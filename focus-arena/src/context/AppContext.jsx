@@ -2,6 +2,7 @@ import { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { sessionsApi } from '../lib/sessionsApi';
 import { groupsApi } from '../lib/groupsApi';
+import { BASE_URL } from '../lib/api';
 
 export const AppContext = createContext(null);
 
@@ -49,7 +50,7 @@ export function AppProvider({ children }) {
       const headers = session?.access_token
         ? { Authorization: `Bearer ${session.access_token}` }
         : {}
-      const res = await fetch(`/api/profiles/${userId}`, { headers })
+      const res = await fetch(`${BASE_URL}/api/profiles/${userId}`, { headers })
       if (!res.ok) {
         if (res.status === 404) return null
         console.error('Failed to load profile: HTTP', res.status)
@@ -136,7 +137,7 @@ export function AppProvider({ children }) {
       const headers = session?.access_token
         ? { Authorization: `Bearer ${session.access_token}` }
         : {}
-      fetch('/api/profiles', { headers })
+      fetch(`${BASE_URL}/api/profiles`, { headers })
         .then((res) => {
           if (!res.ok) throw new Error(`HTTP ${res.status}`)
           return res.json()
@@ -162,7 +163,7 @@ export function AppProvider({ children }) {
 
     // Upsert profile via backend using correct column names (full_name, not name)
     const { data: { session: newSession } } = await supabase.auth.getSession()
-    const res = await fetch(`/api/profiles/${userId}`, {
+    const res = await fetch(`${BASE_URL}/api/profiles/${userId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -187,7 +188,7 @@ export function AppProvider({ children }) {
     // Ensure a profile row exists (handles users registered before profile upsert was fixed)
     if (data.user?.id) {
       const { data: { session: loginSession } } = await supabase.auth.getSession()
-      await fetch(`/api/profiles/${data.user.id}`, {
+      await fetch(`${BASE_URL}/api/profiles/${data.user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
